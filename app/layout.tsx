@@ -21,12 +21,6 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
             <Link href="/" className="text-lg font-bold text-slate-900">
               📝 議事録と ToDo
             </Link>
-            <Link
-              href="/meetings/new"
-              className="rounded-full bg-blue-600 px-4 py-2 text-sm font-bold text-white hover:bg-blue-700"
-            >
-              ＋ 新しい議事録
-            </Link>
           </div>
         </header>
         <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">{children}</main>
