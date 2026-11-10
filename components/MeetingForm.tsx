@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import DateField from "@/components/DateField";
 import type { MeetingInput } from "@/lib/types";
 
 type Props = {
@@ -50,10 +51,8 @@ export default function MeetingForm({ initial, submitLabel, onSubmit, onCancel }
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="例：週次定例" className={field} />
       </label>
       <label className="block">
-        <span className="mb-1 block font-bold">
-          日付 <span className="text-sm font-normal text-slate-500">（空のままなら今日）</span>
-        </span>
-        <input type="date" value={heldOn} onChange={(e) => setHeldOn(e.target.value)} className={field} />
+        <span className="mb-1 block font-bold">日付</span>
+        <DateField value={heldOn} onChange={setHeldOn} placeholder="空のままなら今日" />
       </label>
       <label className="block">
         <span className="mb-1 block font-bold">参加者</span>

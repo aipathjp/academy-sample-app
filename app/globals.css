@@ -6,16 +6,3 @@ body {
   font-family: "Hiragino Sans", "Hiragino Kaku Gothic ProN", "Noto Sans JP", Meiryo, sans-serif;
 }
 
-/* スマホ（特に iPhone）では日付の枠がブラウザ独自の幅になり、はみ出すことがある。
-   ほかの入力枠と同じ幅にそろえる */
-input[type="date"] {
-  -webkit-appearance: none;
-  appearance: none;
-  display: block;
-  min-width: 0;
-  min-height: calc(3rem + 2px); /* ほかの枠と同じ高さ（文字 + 上下の余白 + 枠線） */
-}
-
-input[type="date"]::-webkit-date-and-time-value {
-  text-align: left;
-}
