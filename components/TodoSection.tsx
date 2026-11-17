@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import DateField from "@/components/DateField";
 import { supabase } from "@/lib/supabase";
 import type { Todo } from "@/lib/types";
 
@@ -95,7 +96,7 @@ export default function TodoSection({ meetingId }: { meetingId: string }) {
         <input value={content} onChange={(e) => setContent(e.target.value)} placeholder="やること（例：資料を共有する）" className={`${field} w-full`} />
         <div className="flex flex-col gap-3 sm:flex-row">
           <input value={assignee} onChange={(e) => setAssignee(e.target.value)} placeholder="担当（例：田中）" className={`${field} sm:flex-1`} />
-          <input type="date" value={dueOn} onChange={(e) => setDueOn(e.target.value)} aria-label="期限" className={`${field} sm:flex-1`} />
+          <DateField value={dueOn} onChange={setDueOn} placeholder="期限" className="sm:flex-1" />
         </div>
         <button type="submit" className="w-full rounded-xl bg-green-600 py-3 font-bold text-white hover:bg-green-700">
           ＋ ToDo を追加
