@@ -30,6 +30,9 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
           </div>
         </header>
         <main className="mx-auto w-full max-w-2xl flex-1 px-4 py-6">{children}</main>
+        <footer className="border-t border-slate-200 py-4 text-center text-sm text-slate-500">
+          見本の議事録アプリ
+        </footer>
       </body>
     </html>
   );
