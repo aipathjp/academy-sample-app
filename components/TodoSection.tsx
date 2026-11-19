@@ -2,10 +2,11 @@
 
 import { useEffect, useState } from "react";
 import DateField from "@/components/DateField";
+import { extractTodos } from "@/lib/extractTodos";
 import { supabase } from "@/lib/supabase";
 import type { Todo } from "@/lib/types";
 
-export default function TodoSection({ meetingId }: { meetingId: string }) {
+export default function TodoSection({ meetingId, notes }: { meetingId: string; notes: string }) {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [content, setContent] = useState("");
   const [assignee, setAssignee] = useState("");
@@ -24,24 +25,32 @@ export default function TodoSection({ meetingId }: { meetingId: string }) {
     })();
   }, [meetingId]);
 
-  async function add(e: React.FormEvent) {
-    e.preventDefault();
-    if (!content.trim()) return;
+  async function insert(text: string, who: string, due: string) {
     const { data, error } = await supabase
       .from("todos")
-      .insert({ meeting_id: meetingId, content: content.trim(), assignee: assignee.trim(), due_on: dueOn || null })
+      .insert({ meeting_id: meetingId, content: text, assignee: who, due_on: due || null })
       .select("*")
       .single();
     if (error) {
       setError(error.message);
-      return;
+      return false;
     }
-    setTodos([...todos, data as Todo]);
+    setTodos((prev) => [...prev, data as Todo]);
+    setError("");
+    return true;
+  }
+
+  async function add(e: React.FormEvent) {
+    e.preventDefault();
+    if (!content.trim()) return;
+    if (!(await insert(content.trim(), assignee.trim(), dueOn))) return;
     setContent("");
     setAssignee("");
     setDueOn("");
-    setError("");
   }
+
+  // 内容の「ToDo：」の行のうち、まだ ToDo にしていないもの
+  const candidates = extractTodos(notes).filter((c) => !todos.some((t) => t.content === c));
 
   async function toggle(todo: Todo) {
     const { error } = await supabase.from("todos").update({ done: !todo.done }).eq("id", todo.id);
@@ -91,6 +100,26 @@ export default function TodoSection({ meetingId }: { meetingId: string }) {
           </li>
         ))}
       </ul>
+
+      {candidates.length > 0 && (
+        <div className="mt-4 rounded-lg bg-amber-50 p-3">
+          <p className="text-sm font-bold text-amber-800">内容から見つけた ToDo</p>
+          <ul className="mt-2 space-y-2">
+            {candidates.map((c) => (
+              <li key={c} className="flex items-center gap-3">
+                <span className="min-w-0 flex-1">{c}</span>
+                <button
+                  onClick={() => insert(c, "", "")}
+                  aria-label={`${c} を ToDo に追加する`}
+                  className="shrink-0 rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700"
+                >
+                  ＋ 追加
+                </button>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <form onSubmit={add} className="mt-4 space-y-3 border-t border-slate-100 pt-4">
         <input value={content} onChange={(e) => setContent(e.target.value)} placeholder="やること（例：資料を共有する）" className={`${field} w-full`} />

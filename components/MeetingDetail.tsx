@@ -86,7 +86,7 @@ export default function MeetingDetail() {
         </section>
       )}
 
-      <TodoSection meetingId={meeting.id} />
+      <TodoSection meetingId={meeting.id} notes={meeting.notes} />
     </div>
   );
 }
