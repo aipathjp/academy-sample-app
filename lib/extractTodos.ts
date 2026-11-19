@@ -3,9 +3,10 @@
 
 const MARK = /^(?:[・\-*]\s*)?todo\s*[：:]\s*/i;
 
-export function extractTodos(notes: string): string[] {
+export function extractTodos(notes: string | null | undefined): string[] {
   const found: string[] = [];
-  for (const line of notes.split("\n")) {
+  // 内容が空（null）のときは、候補なし
+  for (const line of (notes ?? "").split("\n")) {
     const trimmed = line.trim();
     if (!MARK.test(trimmed)) continue;
     const content = trimmed.replace(MARK, "").trim();

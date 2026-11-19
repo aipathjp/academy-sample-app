@@ -6,12 +6,13 @@ import { extractTodos } from "@/lib/extractTodos";
 import { supabase } from "@/lib/supabase";
 import type { Todo } from "@/lib/types";
 
-export default function TodoSection({ meetingId, notes }: { meetingId: string; notes: string }) {
+export default function TodoSection({ meetingId, notes }: { meetingId: string; notes: string | null }) {
   const [todos, setTodos] = useState<Todo[]>([]);
   const [content, setContent] = useState("");
   const [assignee, setAssignee] = useState("");
   const [dueOn, setDueOn] = useState("");
   const [error, setError] = useState("");
+  const [adding, setAdding] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -47,6 +48,14 @@ export default function TodoSection({ meetingId, notes }: { meetingId: string; n
     setContent("");
     setAssignee("");
     setDueOn("");
+  }
+
+  // 候補の「＋ 追加」。保存が終わるまで、ほかの「＋ 追加」は押せない（2 回押しても 1 つだけ）
+  async function addCandidate(text: string) {
+    if (adding) return;
+    setAdding(true);
+    await insert(text, "", "");
+    setAdding(false);
   }
 
   // 内容の「ToDo：」の行のうち、まだ ToDo にしていないもの
@@ -109,9 +118,10 @@ export default function TodoSection({ meetingId, notes }: { meetingId: string; n
               <li key={c} className="flex items-center gap-3">
                 <span className="min-w-0 flex-1">{c}</span>
                 <button
-                  onClick={() => insert(c, "", "")}
+                  onClick={() => addCandidate(c)}
+                  disabled={adding}
                   aria-label={`${c} を ToDo に追加する`}
-                  className="shrink-0 rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700"
+                  className="shrink-0 rounded-lg bg-green-600 px-4 py-2 text-sm font-bold text-white hover:bg-green-700 disabled:opacity-50"
                 >
                   ＋ 追加
                 </button>
