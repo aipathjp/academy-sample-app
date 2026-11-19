@@ -1,7 +1,7 @@
 // 議事録の内容から、ToDo の候補を取り出す（上級 第6章）
-// 「ToDo：」「ToDo:」で始まる行を候補にする（大文字・小文字と、行の頭の「・」「-」は気にしない）
+// 「ToDo：」「ToDo:」で始まる行を候補にする（大文字・小文字は区別しない）
 
-const MARK = /^(?:[・\-*]\s*)?todo\s*[：:]\s*/i;
+const MARK = /^todo\s*[：:]\s*/i;
 
 export function extractTodos(notes: string | null | undefined): string[] {
   const found: string[] = [];

@@ -13,6 +13,7 @@ export default function TodoSection({ meetingId, notes }: { meetingId: string; n
   const [dueOn, setDueOn] = useState("");
   const [error, setError] = useState("");
   const [adding, setAdding] = useState(false);
+  const [loaded, setLoaded] = useState(false);
 
   useEffect(() => {
     (async () => {
@@ -22,7 +23,10 @@ export default function TodoSection({ meetingId, notes }: { meetingId: string; n
         .eq("meeting_id", meetingId)
         .order("created_at", { ascending: true });
       if (error) setError(error.message);
-      else setTodos(data as Todo[]);
+      else {
+        setTodos(data as Todo[]);
+        setLoaded(true);
+      }
     })();
   }, [meetingId]);
 
@@ -58,8 +62,8 @@ export default function TodoSection({ meetingId, notes }: { meetingId: string; n
     setAdding(false);
   }
 
-  // 内容の「ToDo：」の行のうち、まだ ToDo にしていないもの
-  const candidates = extractTodos(notes).filter((c) => !todos.some((t) => t.content === c));
+  // 内容の「ToDo：」の行のうち、まだ ToDo にしていないもの（ToDo を読み終えるまでは出さない）
+  const candidates = !loaded ? [] : extractTodos(notes).filter((c) => !todos.some((t) => t.content === c));
 
   async function toggle(todo: Todo) {
     const { error } = await supabase.from("todos").update({ done: !todo.done }).eq("id", todo.id);
