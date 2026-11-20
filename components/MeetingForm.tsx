@@ -10,6 +10,9 @@ type Props = {
   onCancel?: () => void;
 };
 
+// 保存の返事をこれ以上待っても来ないときは、止まったとみなしてボタンを元に戻す
+const SAVE_TIMEOUT_MS = 15000;
+
 function today() {
   const d = new Date();
   const pad = (n: number) => String(n).padStart(2, "0");
@@ -22,6 +25,8 @@ export default function MeetingForm({ initial, submitLabel, onSubmit, onCancel }
   const [attendees, setAttendees] = useState(initial?.attendees ?? "");
   const [notes, setNotes] = useState(initial?.notes ?? "");
   const [saving, setSaving] = useState(false);
+  // 保存が終わり、次の画面を開いているところ（npm run dev では、はじめての画面に時間がかかることがある）
+  const [saved, setSaved] = useState(false);
   const [error, setError] = useState("");
 
   async function handleSubmit(e: React.FormEvent) {
@@ -32,12 +37,25 @@ export default function MeetingForm({ initial, submitLabel, onSubmit, onCancel }
     }
     setSaving(true);
     setError("");
+    let timer: ReturnType<typeof setTimeout> | undefined;
+    const timeout = new Promise<never>((_, reject) => {
+      timer = setTimeout(
+        () => reject(new Error("うまくつながりませんでした。ページを読み直して、一覧に増えていなければ、もう一度押してください。")),
+        SAVE_TIMEOUT_MS,
+      );
+    });
     try {
       // 日付が空のときは今日にする
-      await onSubmit({ title: title.trim(), held_on: heldOn || today(), attendees: attendees.trim(), notes });
+      await Promise.race([
+        onSubmit({ title: title.trim(), held_on: heldOn || today(), attendees: attendees.trim(), notes }),
+        timeout,
+      ]);
+      setSaved(true);
     } catch (e) {
       setError(e instanceof Error ? e.message : String(e));
       setSaving(false);
+    } finally {
+      clearTimeout(timer);
     }
   }
 
@@ -76,7 +94,7 @@ export default function MeetingForm({ initial, submitLabel, onSubmit, onCancel }
           disabled={saving}
           className="flex-1 rounded-xl bg-blue-600 py-3 text-base font-bold text-white hover:bg-blue-700 disabled:opacity-50"
         >
-          {saving ? "保存中…" : submitLabel}
+          {saved ? "保存しました。画面を開いています…" : saving ? "保存中…" : submitLabel}
         </button>
         {onCancel && (
           <button type="button" onClick={onCancel} className="rounded-xl border border-slate-300 bg-white px-5 py-3">
